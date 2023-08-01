@@ -2,12 +2,17 @@ package com.junit.service;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UserServiceTest {
-
+class UserServiceTest {
+    public static void main(String[] args) {
+        System.out.println();
+    }
     @Test
-    void test() {
-        fail();
+    void usersEmptyIfNoUsersAdded() {
+        var userService = new UserService();
+        var users = userService.getAll();
+        assertFalse(users.isEmpty(), () -> "List of users is empty");
     }
 }
