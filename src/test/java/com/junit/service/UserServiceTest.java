@@ -54,16 +54,29 @@ public class UserServiceTest {
     }
 
     @Test
+    void throwExceptionIfUsernameOrPasswordIsNull() {
+        assertAll(
+                () -> {
+                    var exception = assertThrows(IllegalArgumentException.class, () -> userService.login(null, "test"),
+                            "Login should throw exception on null username");
+                    assertThat(exception.getMessage()).isEqualTo("Username or password is null");
+                },
+                () -> assertThrows(IllegalArgumentException.class, () -> userService.login("test", null),
+                        "Login should throw exception on null password")
+        );
+    }
+
+    @Test
     void loginFailIfPasswordIsNotCorrect() {
         userService.add(IVAN);
-        Optional<User> maybeUser = userService.login(IVAN.getUsername(), "qwerty");
+        Optional<User> maybeUser = userService.login(IVAN.getUsername(), "test");
         assertTrue(maybeUser.isEmpty());
     }
 
     @Test
     void loginFailIfUserDoesNotExist() {
         userService.add(IVAN);
-        Optional<User> maybeUser = userService.login("none", IVAN.getPassword());
+        Optional<User> maybeUser = userService.login("test", IVAN.getPassword());
         assertTrue(maybeUser.isEmpty());
     }
 
