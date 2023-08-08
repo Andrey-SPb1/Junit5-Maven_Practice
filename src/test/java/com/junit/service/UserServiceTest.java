@@ -1,10 +1,16 @@
 package com.junit.service;
 
 import com.junit.entity.User;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.collection.IsEmptyCollection;
+import org.hamcrest.collection.IsMapContaining;
 import org.junit.jupiter.api.*;
 
+import java.util.Map;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.collection.IsEmptyCollection.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -30,6 +36,8 @@ public class UserServiceTest {
     void usersEmptyIfNoUsersAdded() {
         System.out.println("Test 1: " + this);
         var users = userService.getAll();
+
+        MatcherAssert.assertThat(users, empty());
         assertFalse(users.isEmpty(), "List of users is empty");
     }
 
@@ -37,8 +45,12 @@ public class UserServiceTest {
     void loginSuccessIfUserExists() {
         userService.add(IVAN);
         Optional<User> maybeUser = userService.login(IVAN.getUsername(), IVAN.getPassword());
-        assertTrue(maybeUser.isPresent());
-        maybeUser.ifPresent(user -> assertEquals(IVAN, user));
+
+        assertThat(maybeUser).isPresent();
+        maybeUser.ifPresent(user -> assertThat(user).isEqualTo(IVAN));
+
+//        assertTrue(maybeUser.isPresent());
+//        maybeUser.ifPresent(user -> assertEquals(IVAN, user));
     }
 
     @Test
@@ -56,13 +68,29 @@ public class UserServiceTest {
     }
 
     @Test
+    void usersConvertedToMapById() {
+        userService.add(IVAN, PETR);
+
+        Map<Integer, User> users = userService.getAllConvertedById();
+
+//        MatcherAssert.assertThat(users, IsMapContaining.hasKey(IVAN.getId()));
+        assertAll(
+                () -> assertThat(users).containsKeys(IVAN.getId(), PETR.getId()),
+                () -> assertThat(users).containsValues(IVAN, PETR)
+        );
+
+    }
+
+    @Test
     void usersSizeIfUsersAdded() {
         System.out.println("Test 2: " + this);
         userService.add(IVAN);
         userService.add(PETR);
 
         var users = userService.getAll();
-        assertEquals(2, users.size());
+
+        assertThat(users).hasSize(2);
+//        assertEquals(2, users.size());
     }
 
     @AfterEach
