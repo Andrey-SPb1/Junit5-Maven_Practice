@@ -13,6 +13,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Tag("user")
+@Tag("fast")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserServiceTest {
 
@@ -37,11 +39,12 @@ public class UserServiceTest {
         System.out.println("Test 1: " + this);
         var users = userService.getAll();
 
-        MatcherAssert.assertThat(users, empty());
-        assertFalse(users.isEmpty(), "List of users is empty");
+//        MatcherAssert.assertThat(users, empty());
+        assertTrue(users.isEmpty(), "List of users is empty");
     }
 
     @Test
+    @Tag("login")
     void loginSuccessIfUserExists() {
         userService.add(IVAN);
         Optional<User> maybeUser = userService.login(IVAN.getUsername(), IVAN.getPassword());
@@ -54,6 +57,7 @@ public class UserServiceTest {
     }
 
     @Test
+    @Tag("login")
     void throwExceptionIfUsernameOrPasswordIsNull() {
         assertAll(
                 () -> {
@@ -67,6 +71,7 @@ public class UserServiceTest {
     }
 
     @Test
+    @Tag("login")
     void loginFailIfPasswordIsNotCorrect() {
         userService.add(IVAN);
         Optional<User> maybeUser = userService.login(IVAN.getUsername(), "test");
@@ -74,6 +79,7 @@ public class UserServiceTest {
     }
 
     @Test
+    @Tag("login")
     void loginFailIfUserDoesNotExist() {
         userService.add(IVAN);
         Optional<User> maybeUser = userService.login("test", IVAN.getPassword());
