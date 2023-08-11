@@ -1,10 +1,12 @@
 package com.junit.service;
 
 import com.junit.entity.User;
+import com.junit.paramresolver.UserServiceParamResolver;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Map;
 import java.util.Optional;
@@ -17,6 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("fast")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.DisplayName.class)
+@ExtendWith(
+        UserServiceParamResolver.class
+)
 public class UserServiceTest {
 
     private static final User IVAN = User.of(1, "Ivan", "213");
@@ -24,21 +29,25 @@ public class UserServiceTest {
 
     private UserService userService;
 
+    UserServiceTest(TestInfo testInfo) {
+        System.out.println();
+    }
+
     @BeforeAll
     void init() {
         System.out.println("Before all: " + this);
     }
 
     @BeforeEach
-    void prepare() {
+    void prepare(UserService userService) {
         System.out.println("Before each: " + this);
-        userService = new UserService();
+        this.userService = userService;
     }
 
     @Test
     @Order(1)
     @DisplayName("Users will be empty if no user added")
-    void usersEmptyIfNoUsersAdded() {
+    void usersEmptyIfNoUsersAdded(UserService userService) {
         System.out.println("Test 1: " + this);
         var users = userService.getAll();
 
