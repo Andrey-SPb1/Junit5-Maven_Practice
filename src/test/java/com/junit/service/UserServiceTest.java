@@ -7,9 +7,12 @@ import org.hamcrest.collection.IsEmptyCollection;
 import org.hamcrest.collection.IsMapContaining;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.*;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.*;
@@ -134,5 +137,34 @@ public class UserServiceTest {
                             "Login should throw exception on null password")
             );
         }
+
+        @ParameterizedTest(name = "{arguments} test")
+//        @NullAndEmptySource
+//        @ValueSource(
+//                strings = {"Ivan", "Petr"}
+//        )
+//        @CsvSource({
+//                "Ivan, 213",
+//                "Petr, 421"
+//        })
+//        @CsvFileSource(resources = "/login-test-data.csv", delimiter = ',', numLinesToSkip = 1)
+        @MethodSource("com.junit.service.UserServiceTest#getArgumentsForLoginTest")
+        void loginParameterizedTest(String username, String password, Optional<User> user) {
+            userService.add(IVAN, PETR);
+
+            var optionalUser = userService.login(username, password);
+            assertThat(optionalUser).isEqualTo(user);
+        }
+
+    }
+
+    @DisplayName("login param test")
+    static Stream<Arguments> getArgumentsForLoginTest() {
+        return Stream.of(
+                Arguments.of("Ivan", "213", Optional.of(IVAN)), // Check users
+                Arguments.of("Petr", "421", Optional.of(PETR)),
+                Arguments.of("Petr", "test", Optional.empty()), // Check username
+                Arguments.of("test", "213", Optional.empty()) // Check password
+        );
     }
 }
