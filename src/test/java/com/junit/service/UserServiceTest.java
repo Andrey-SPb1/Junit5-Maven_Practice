@@ -1,23 +1,20 @@
 package com.junit.service;
 
+import com.junit.TestBase;
 import com.junit.entity.User;
-import com.junit.paramresolver.UserServiceParamResolver;
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.collection.IsEmptyCollection;
-import org.hamcrest.collection.IsMapContaining;
+import com.junit.extension.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.collection.IsEmptyCollection.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.RepeatedTest.LONG_DISPLAY_NAME;
 
@@ -25,10 +22,15 @@ import static org.junit.jupiter.api.RepeatedTest.LONG_DISPLAY_NAME;
 @Tag("fast")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.DisplayName.class)
-@ExtendWith(
-        UserServiceParamResolver.class
+@ExtendWith({
+        UserServiceParamResolver.class,
+//        GlobalExtension.class,
+        PostProcessingExtension.class,
+        ConditionalExtension.class,
+        ThrowableExtension.class
+}
 )
-public class UserServiceTest {
+public class UserServiceTest extends TestBase {
 
     private static final User IVAN = User.of(1, "Ivan", "213");
     private static final User PETR = User.of(2, "Petr", "421");
@@ -53,7 +55,10 @@ public class UserServiceTest {
     @Test
     @Order(1)
     @DisplayName("Users will be empty if no user added")
-    void usersEmptyIfNoUsersAdded(UserService userService) {
+    void usersEmptyIfNoUsersAdded(UserService userService) throws IOException{
+        if(true) {
+            throw new RuntimeException();
+        }
         System.out.println("Test 1: " + this);
         var users = userService.getAll();
 
@@ -72,7 +77,6 @@ public class UserServiceTest {
                 () -> assertThat(users).containsKeys(IVAN.getId(), PETR.getId()),
                 () -> assertThat(users).containsValues(IVAN, PETR)
         );
-
     }
 
     @Test
@@ -124,7 +128,7 @@ public class UserServiceTest {
             System.out.println(Thread.currentThread().getName());
             var optionalUser = assertTimeoutPreemptively(Duration.ofMillis(200L), () -> {
                 System.out.println(Thread.currentThread().getName());
-                Thread.sleep(300L);
+//                Thread.sleep(300L);
                 return userService.login("test", IVAN.getPassword());
             });
         }
