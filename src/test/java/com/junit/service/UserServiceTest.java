@@ -1,12 +1,14 @@
 package com.junit.service;
 
 import com.junit.TestBase;
+import com.junit.dao.UserDao;
 import com.junit.entity.User;
 import com.junit.extension.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
+import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -27,7 +29,7 @@ import static org.junit.jupiter.api.RepeatedTest.LONG_DISPLAY_NAME;
 //        GlobalExtension.class,
         PostProcessingExtension.class,
         ConditionalExtension.class,
-        ThrowableExtension.class
+//        ThrowableExtension.class
 }
 )
 public class UserServiceTest extends TestBase {
@@ -35,6 +37,7 @@ public class UserServiceTest extends TestBase {
     private static final User IVAN = User.of(1, "Ivan", "213");
     private static final User PETR = User.of(2, "Petr", "421");
 
+    private UserDao userDao;
     private UserService userService;
 
     UserServiceTest(TestInfo testInfo) {
@@ -47,15 +50,33 @@ public class UserServiceTest extends TestBase {
     }
 
     @BeforeEach
-    void prepare(UserService userService) {
+    void prepare() {
         System.out.println("Before each: " + this);
-        this.userService = userService;
+        this.userDao = Mockito.mock(UserDao.class);
+        this.userService = new UserService(userDao);
+    }
+
+    @Test
+    void shouldDeleteExistedUser() {
+        userService.add(IVAN);
+
+        Mockito.doReturn(true).when(userDao).delete(IVAN.getId());
+//        Mockito.doReturn(true).when(userDao).delete(Mockito.any());
+
+        Mockito.when(userDao.delete(IVAN.getId()))
+                .thenReturn(true)
+                .thenReturn(false);
+
+        var deleteResult = userService.delete(IVAN.getId());
+        System.out.println(userService.delete(IVAN.getId()));
+
+        assertThat(deleteResult).isTrue();
     }
 
     @Test
     @Order(1)
     @DisplayName("Users will be empty if no user added")
-    void usersEmptyIfNoUsersAdded(UserService userService) throws IOException{
+    void usersEmptyIfNoUsersAdded(UserService userService) throws IOException {
         if(true) {
             throw new RuntimeException();
         }

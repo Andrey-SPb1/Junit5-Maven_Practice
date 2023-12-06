@@ -1,10 +1,9 @@
 package com.junit.service;
 
+import com.junit.dao.UserDao;
 import com.junit.entity.User;
 
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.util.function.Function.*;
 import static java.util.stream.Collectors.*;
@@ -12,6 +11,16 @@ import static java.util.stream.Collectors.*;
 public class UserService {
 
     private final List<User> users = new ArrayList<>();
+    private final UserDao userDao;
+
+    public UserService(UserDao userDao) {
+        this.userDao = userDao;
+    }
+
+    public boolean delete(Integer userId) {
+        return userDao.delete(userId);
+    }
+
     public List<User> getAll() {
         return users;
     }
