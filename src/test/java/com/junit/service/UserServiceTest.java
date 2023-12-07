@@ -8,6 +8,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -52,7 +53,7 @@ public class UserServiceTest extends TestBase {
     @BeforeEach
     void prepare() {
         System.out.println("Before each: " + this);
-        this.userDao = Mockito.mock(UserDao.class);
+        this.userDao = Mockito.spy(new UserDao());
         this.userService = new UserService(userDao);
     }
 
@@ -63,12 +64,16 @@ public class UserServiceTest extends TestBase {
         Mockito.doReturn(true).when(userDao).delete(IVAN.getId());
 //        Mockito.doReturn(true).when(userDao).delete(Mockito.any());
 
-        Mockito.when(userDao.delete(IVAN.getId()))
-                .thenReturn(true)
-                .thenReturn(false);
+//        Mockito.when(userDao.delete(IVAN.getId()))
+//                .thenReturn(true)
+//                .thenReturn(false);
 
+        var integerArgumentCaptor = ArgumentCaptor.forClass(Integer.class);
         var deleteResult = userService.delete(IVAN.getId());
         System.out.println(userService.delete(IVAN.getId()));
+
+        Mockito.verify(userDao, Mockito.times(2)).delete(integerArgumentCaptor.capture());
+        assertThat(integerArgumentCaptor.getValue()).isEqualTo(IVAN.getId());
 
         assertThat(deleteResult).isTrue();
     }
